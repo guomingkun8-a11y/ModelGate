@@ -1,0 +1,28 @@
+# ModelGate 本地模拟调用：不发送给外部模型、不产生模型 API 费用。
+# 先执行 scripts/start-demo.ps1，默认 8010 端口。
+
+### 列出模型（虚拟 Key，与管理员登录令牌独立）
+GET http://127.0.0.1:8010/v1/models
+Authorization: Bearer mg-demo-local
+
+### 非流式聊天
+POST http://127.0.0.1:8010/v1/chat/completions
+Authorization: Bearer mg-demo-local
+Content-Type: application/json
+
+{
+  "model": "gpt-4o-mini",
+  "messages": [{"role": "user", "content": "解释一下模型网关的故障切换"}],
+  "stream": false
+}
+
+### SSE 流式聊天
+POST http://127.0.0.1:8010/v1/chat/completions
+Authorization: Bearer mg-demo-local
+Content-Type: application/json
+
+{
+  "model": "gpt-4o-mini",
+  "messages": [{"role": "user", "content": "介绍 ModelGate Demo"}],
+  "stream": true
+}

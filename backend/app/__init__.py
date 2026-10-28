@@ -1,0 +1,1 @@
+"""ModelGate local demonstration application."""
