@@ -1,6 +1,6 @@
 # ModelGate 演示控制台
 
-Vue 3 + TypeScript + Vite + Element Plus 管理台。默认浅色中文界面，数据全部来自本地 FastAPI Demo；API 不可用时显示连接错误，不使用虚构数据回退。
+React 19 + TypeScript + Vite + Ant Design 管理台，使用 React Router 管理页面、React Context 管理管理员会话、Axios 统一访问后端，图标采用 Lucide React。默认浅色中文界面，数据全部来自本地 FastAPI Demo；API 不可用时显示连接错误，不使用虚构数据回退。
 
 ## 开发运行
 
@@ -24,13 +24,15 @@ npm run build
 ## 文件分类
 
 - `src/api/`：登录、供应商、路由、虚拟 Key、请求、用量和设置接口；`http.ts` 统一鉴权与错误处理。
-- `src/components/`：侧栏、页头、统计、状态标签、请求趋势图和测试请求面板。
-- `src/layouts/`：管理台通用布局。
-- `src/pages/`：Login、Overview、Providers、ModelRoutes、VirtualKeys、RequestLogs、Usage、Settings。
-- `src/router/`：路由和登录保护。
-- `src/stores/auth.ts`：管理员会话。
+- `src/components/`：React 侧栏、页头、统计、状态标签、请求趋势图和测试请求面板。
+- `src/layouts/AdminLayout.tsx`：管理台通用布局。
+- `src/pages/`：Login、Overview、Providers、ModelRoutes、VirtualKeys、RequestLogs、Usage、Settings，各页面使用 `.tsx`。
+- `src/router/index.tsx`：React Router 路由、按页加载和登录保护。
+- `src/stores/auth.tsx`：基于 React Context 的管理员会话，登录状态保存在 `sessionStorage`。
+- `src/hooks/useData.ts`：共享加载、错误与刷新逻辑。
 - `src/types/`：与 Demo 后端对应的 TypeScript 类型。
 - `src/style.css`：共享设计变量、布局和响应式样式。
+- `src/main.tsx`、`src/App.tsx`：React 入口和应用级配置。
 
 ## 可体验功能
 

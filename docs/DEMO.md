@@ -6,6 +6,8 @@
 
 后端 `127.0.0.1:8010`，同时托管构建后的前端；开发时前端 Vite `127.0.0.1:5173`。Vite 代理 `/internal`、`/v1` 和 `/healthz` 到后端。
 
+管理台采用 React 19、TypeScript、Vite、Ant Design 和 React Router。管理员登录态由 React Context 管理，保存在当前浏览器会话；API 契约和 SQLite 演示数据不因前端迁移而改变。
+
 Demo 管理员登录 `POST /internal/auth/login`，请求 `{password:"modelgate-demo"}`，返回 `{token,name}`。开发默认密码与令牌只用于本地演示，可用环境变量覆盖。管理接口使用 Bearer token；`/v1` 独立使用 Demo 虚拟 Key `mg-demo-local`。
 
 ## 管理接口

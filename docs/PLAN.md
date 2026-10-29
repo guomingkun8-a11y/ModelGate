@@ -13,7 +13,7 @@
 - 优先级、权重、有限次数故障切换和短期熔断。
 - 虚拟 API Key 鉴权、按 Key 的 RPM、按上游的共享并发限制。
 - PostgreSQL 请求记录、上游尝试、耗时和 Token 用量。
-- Vue 只读监控页，以及 Docker Compose 演示、故障测试和压测报告。
+- React 只读监控页，以及 Docker Compose 演示、故障测试和压测报告。
 
 ### 后续完整管理台
 

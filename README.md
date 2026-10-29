@@ -4,7 +4,7 @@
 
 ## 当前版本：可本地体验的 Demo
 
-Vue 3 中文管理台 + FastAPI 演示后端。无需真实模型 API Key、PostgreSQL 或 Redis，即可查看流量、发起模拟请求并观察故障切换。
+React 19 中文管理台 + FastAPI 演示后端。前端采用 TypeScript、Vite、Ant Design 和 React Router。无需真实模型 API Key、PostgreSQL 或 Redis，即可查看流量、发起模拟请求并观察故障切换。
 
 - **总览**：请求量、成功率、P95 延迟、Token、流量趋势与最近请求。
 - **供应商与路由**：查看模型映射、启停模拟上游，验证备用渠道接管。
@@ -54,7 +54,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\start-demo.ps1
 ```text
 ModelGate/
 ├── backend/             # FastAPI、SQLite 演示状态、网关逻辑与测试
-├── frontend/            # Vue 3 + TypeScript + Vite 管理台
+├── frontend/            # React 19 + TypeScript + Vite + Ant Design 管理台
 ├── docs/                # Demo 契约、长期架构与阶段清单
 ├── deploy/nginx/        # 生产部署阶段预留
 ├── scripts/             # 一键启动脚本
@@ -73,9 +73,19 @@ ModelGate/
 
 当前使用 SQLite、进程内限制和模拟供应商，适合单进程本地演示。PostgreSQL、Redis 共享限流、真实上游适配、跨进程熔断、预算、生产登录与可靠计费仍按原计划实现。历史样例不作为压测证据，尚未声明生产性能指标。
 
-## 验证结果
+## 验证方式
 
-本次 Demo 已完成前端 TypeScript 检查与生产构建、8 项后端测试，以及运行中的 HTTP / SSE 冒烟验证。浏览器已验证登录、测试故障切换、逐次尝试详情、供应商启停、虚拟 Key 创建和撤销。
+React 迁移已通过类型检查、生产构建和浏览器交互验收。复验命令：
+
+```powershell
+cd frontend
+npm run typecheck
+npm run build
+cd ../backend
+../.venv/Scripts/python -m pytest tests -q
+```
+
+浏览器验收覆盖登录与受保护地址回跳、测试请求及 503 故障切换、请求尝试详情、供应商启停、虚拟 Key 创建与撤销、用量时间筛选和移动端导航。后端接口、SQLite 数据与模型模拟机制沿用现有 Demo。
 
 更多演示截图：[故障切换](docs/screenshots/demo-request.png)、[请求详情](docs/screenshots/request-details.png)。
 
