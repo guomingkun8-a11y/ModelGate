@@ -78,7 +78,7 @@ export default function VirtualKeys() {
     { title: '创建时间', dataIndex: 'created_at', render: value => new Date(value).toLocaleDateString('zh-CN') },
     { title: '操作', fixed: 'right', align: 'right', width: 100, render: (_, key) => <Button type="text" danger disabled={key.status === 'revoked' || revoking.includes(key.id)} loading={revoking.includes(key.id)} onClick={() => revoke(key)}>{key.status === 'revoked' ? '已撤销' : '撤销'}</Button> },
   ]
-  const curl = `curl ${window.location.origin}/v1/chat/completions \\\n  -H "Authorization: Bearer <你的虚拟密钥>" \\\n  -H "Content-Type: application/json" \\\n  -d '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"Hello"}]}'`
+  const curl = `curl ${window.location.origin}/v1/chat/completions \\\n  -H "Authorization: Bearer sk-<你的虚拟密钥>" \\\n  -H "Content-Type: application/json" \\\n  -d '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"Hello"}]}'`
 
   return <>
     <section className="page-heading"><div><h1 className="page-title">虚拟密钥</h1><p className="page-subtitle">为应用分配独立凭据，统一管理模型访问。</p></div><Button type="primary" icon={<Plus size={16} />} onClick={openCreate}>创建密钥</Button></section>

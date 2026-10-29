@@ -47,7 +47,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\start-demo.ps1
 4. 禁用一个供应商并重试；查看路由是否跳过它，体验后恢复开启。
 5. 创建虚拟 Key，只在创建时复制明文，再撤销并验证它无法继续调用。
 
-默认演示登录密码是 `modelgate-demo`，默认演示虚拟 Key 是 `mg-demo-local`，仅供本机 Demo 使用。更多独立接口示例见 [demo-request.http](examples/demo-request.http)。
+默认演示登录密码是 `modelgate-demo`，默认演示虚拟 Key 是 `sk-demo-local`，仅供本机 Demo 使用。新建虚拟 Key 也使用 `sk-` 前缀；旧的自定义 Key 仍可继续使用。更多独立接口示例见 [demo-request.http](examples/demo-request.http)。
 
 ## 项目分类
 

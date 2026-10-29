@@ -23,7 +23,7 @@ python -m venv .venv
 
 - 管理台密码：`modelgate-demo`，由 `MODEL_GATE_DEMO_PASSWORD` 覆盖。
 - 管理令牌：`mg-admin-local-demo`，由 `MODEL_GATE_ADMIN_TOKEN` 覆盖。
-- 模型接口虚拟 Key：`mg-demo-local`，只能调用 `/v1`，不能访问管理接口。
+- 模型接口虚拟 Key：`sk-demo-local`，只能调用 `/v1`，不能访问管理接口。新建虚拟 Key 使用 `sk-` 前缀。
 - 通过管理页面新建的 Key 只返回一次明文，数据库保存带盐哈希，可立即撤销。
 
 这些默认身份只用于本机 Demo。模拟供应商不会访问页面中展示的外部 URL，不会产生 API 费用。

@@ -44,7 +44,7 @@ export default function DemoRequestPanel({open, onClose}: {open: boolean; onClos
   async function copy() {
     const body = JSON.stringify({model, messages: [{role: 'user', content: 'Hello'}]})
     try {
-      await navigator.clipboard.writeText(`curl ${window.location.origin}/v1/chat/completions \\\n  -H "Authorization: Bearer mg-demo-local" \\\n  -H "Content-Type: application/json" \\\n  -d '${body}'`)
+      await navigator.clipboard.writeText(`curl ${window.location.origin}/v1/chat/completions \\\n  -H "Authorization: Bearer sk-demo-local" \\\n  -H "Content-Type: application/json" \\\n  -d '${body}'`)
       void message.success('调用示例已复制')
     } catch {void message.error('复制失败，请检查浏览器剪贴板权限')}
   }

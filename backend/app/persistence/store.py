@@ -57,6 +57,7 @@ class Store:
             CREATE TABLE IF NOT EXISTS metadata (name TEXT PRIMARY KEY, value TEXT NOT NULL);
         """)
         self.seed()
+        self.migrate_default_demo_key()
         self.recover_interrupted()
 
     def close(self):
@@ -77,7 +78,7 @@ class Store:
 
     def create_key(self, name: str, rpm_limit: int, plaintext: str | None = None,
                    key_id: str | None = None) -> tuple[str, dict]:
-        plaintext = plaintext or "mg-" + secrets.token_urlsafe(30)
+        plaintext = plaintext or "sk-" + secrets.token_urlsafe(30)
         record = {
             "id": key_id or "key_" + secrets.token_hex(6), "name": name,
             "prefix": plaintext[:12] + "…", "created_at": timestamp(),
@@ -88,6 +89,22 @@ class Store:
             self.db.execute("INSERT INTO virtual_keys VALUES (?, ?, ?)",
                             (record["id"], hash_key(plaintext), json.dumps(record)))
         return plaintext, record
+
+    def migrate_default_demo_key(self):
+        old_key, new_key = "mg-demo-local", "sk-demo-local"
+        with self.lock:
+            row = self.db.execute(
+                "SELECT key_hash, data FROM virtual_keys WHERE id='key_demo'"
+            ).fetchone()
+            if not row or not verify_key(old_key, row["key_hash"]):
+                return
+            record = json.loads(row["data"])
+            record["prefix"] = new_key[:12] + "…"
+            self.db.execute(
+                "UPDATE virtual_keys SET key_hash=?, data=? WHERE id='key_demo'",
+                (hash_key(new_key), json.dumps(record)),
+            )
+            self.db.commit()
 
     def authenticate_key(self, plaintext: str) -> dict | None:
         with self.lock:
@@ -212,7 +229,7 @@ class Store:
                       "enabled": True}
             with self.lock, self.db:
                 self.db.execute("INSERT INTO model_routes VALUES (?, ?)", (record["id"], json.dumps(record)))
-        self.create_key("本地演示密钥", 60, "mg-demo-local", "key_demo")
+        self.create_key("本地演示密钥", 60, "sk-demo-local", "key_demo")
         self.create_key("开发环境", 120, key_id="key_development")
         rng = random.Random(42)
         now = utcnow()

@@ -8,7 +8,7 @@
 
 管理台采用 React 19、TypeScript、Vite、Ant Design 和 React Router。管理员登录态由 React Context 管理，保存在当前浏览器会话；API 契约和 SQLite 演示数据不因前端迁移而改变。
 
-Demo 管理员登录 `POST /internal/auth/login`，请求 `{password:"modelgate-demo"}`，返回 `{token,name}`。开发默认密码与令牌只用于本地演示，可用环境变量覆盖。管理接口使用 Bearer token；`/v1` 独立使用 Demo 虚拟 Key `mg-demo-local`。
+Demo 管理员登录 `POST /internal/auth/login`，请求 `{password:"modelgate-demo"}`，返回 `{token,name}`。开发默认密码与令牌只用于本地演示，可用环境变量覆盖。管理接口使用 Bearer token；`/v1` 独立使用 Demo 虚拟 Key `sk-demo-local`。新建虚拟 Key 使用 `sk-` 前缀。
 
 ## 管理接口
 
