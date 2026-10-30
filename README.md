@@ -1,6 +1,6 @@
 # ModelGate
 
-面向团队的多模型 API 网关，作为 Python 后端 / AI 平台方向的开源作品集项目。
+基于 FastAPI、React 19 和 PostgreSQL 的多模型 API 网关。管理员统一配置共享渠道与公开模型，用户通过个人 `sk-` 密钥调用，并查看自己的请求日志和 Token 用量。
 
 ## 当前版本：本地可运行的多模型网关
 
