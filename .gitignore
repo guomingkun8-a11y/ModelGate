@@ -36,3 +36,6 @@ loadtests/results/
 Thumbs.db
 .idea/
 .vscode/
+.omo/
+.workbuddy/
+.codegraph/

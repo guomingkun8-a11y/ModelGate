@@ -4,7 +4,7 @@
 
 在 2–4 周内做出可演示、可测试的核心网关，展示异步请求处理、路由、共享限流、故障切换和数据持久化能力。工期是目标，功能是否完成以验收结果为准。
 
-当前已实现本地 Demo，具体能力和接口见 [DEMO.md](DEMO.md)。本文保留 PostgreSQL / Redis 生产目标；Demo 使用 SQLite 与模拟上游，不等于下列生产能力全部完成。
+本文描述长期目标，不是当前功能完成声明。当前版本使用 PostgreSQL 和真实 OpenAI 兼容上游，支持注册、账号隔离、管理员共享渠道和虚拟密钥；入口及限制见[根 README](../README.md)，接口见 [API.md](API.md)。早期 SQLite Demo 已移除，历史契约保留在 [DEMO.md](DEMO.md)。Redis 尚未接入，SSE 当前为完整上游响应后的缓冲输出。
 
 ### 核心 MVP
 
@@ -17,7 +17,7 @@
 
 ### 后续完整管理台
 
-保留用户约定的 Login、Providers、ModelRoutes、VirtualKeys、RequestLogs、Usage、Settings 页面规划。供应商、路由、Key 的在线编辑和管理员登录在核心链路稳定后实现；目录存在不代表功能完成。
+Login、Register、Providers、ModelRoutes、VirtualKeys、RequestLogs、Usage、Settings 已有页面。当前管理员独占共享渠道管理，普通用户只读公开渠道和模型，通过自己的虚拟 Key 调用；后续完善路由策略编辑与管理员审计。
 
 预算计费、复杂 RBAC、SSO、更多原生供应商协议和 OpenTelemetry 留到后续。首版使用模块化单体，不引入 Celery、Kafka 或 Kubernetes。
 
@@ -29,11 +29,11 @@
        → 返回 JSON / SSE → 记录尝试与结果 → 释放租约
 ```
 
-- 配置运行时以 PostgreSQL 为准；bootstrap 环境配置只负责幂等初始化，不能在每次启动覆盖管理员后续修改。
+- 渠道运行时配置以 PostgreSQL 为准，由管理员在管理页维护；环境配置负责数据库连接、管理员初始化和加密主密钥。
 - HTTPX 客户端复用连接池。数据库事务分段提交，不跨越整个上游响应生命周期。
 - 虚拟 API Key 只保存可校验的哈希与展示前缀；上游真实 Key 使用环境主密钥加密后存储。
 - 默认不记录提示词、完整请求体、响应正文或任何密钥。
-- 管理员身份与模型调用虚拟 Key 独立；核心阶段管理接口使用独立的环境管理令牌，完整管理台阶段实现登录流程。
+- 管理台登录会话与模型调用虚拟 Key 独立；管理员和普通用户共用登录入口，由后端按角色和账号检查权限。
 
 ## 路由与失败行为
 

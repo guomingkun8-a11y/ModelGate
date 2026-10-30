@@ -1,6 +1,8 @@
-# Demo 实现契约
+# 历史 Demo 实现契约（已移除）
 
-本文件描述当前 Demo；生产目标继续见 PLAN.md。Demo 用 SQLite 保留本地状态，进程内并发保护和受控模拟上游，不依赖 PostgreSQL、Redis 或真实付费服务。生产级共享限流、预算和高可用不属于本次 Demo。
+> 本文件仅保留早期 SQLite / 模拟供应商 Demo 的设计记录。该实现、`scripts/start-demo.ps1` 和 `/internal/demo/request` 已从当前版本移除；下列端口、示例凭据、接口和数据类型不适用于当前版本。请按[根 README](../README.md)启动 PostgreSQL 网关，并以[当前 API 文档](API.md)和运行服务的 `/docs` 为准。Redis 尚未接入，当前 SSE 为完整响应后的缓冲输出，尚非实时转发。
+
+以下为历史契约原文。早期 Demo 用 SQLite 保留本地状态，进程内并发保护和受控模拟上游，不依赖 PostgreSQL、Redis 或真实付费服务。
 
 ## 运行与鉴权
 

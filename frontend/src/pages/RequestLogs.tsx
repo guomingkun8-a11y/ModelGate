@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Alert, Button, Descriptions, Drawer, Empty, Input, Select, Skeleton, Table, Tag } from 'antd'
+import { Alert, Button, Descriptions, Drawer, Empty, Input, Select, Skeleton, Table } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { ArrowRight, RefreshCw, Search } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
@@ -50,7 +50,7 @@ export default function RequestLogs() {
     { title: '供应商', dataIndex: 'provider', render: value => value || '未分配' },
     { title: '状态', dataIndex: 'status', render: value => <StatusTag status={value} /> },
     { title: '耗时', align: 'right', render: (_, row) => <span className="mono">{row.latency_ms} <span className="muted">ms</span></span> },
-    { title: 'Token', align: 'right', render: (_, row) => <span className="mono">{(row.input_tokens + row.output_tokens).toLocaleString('zh-CN')}</span> },
+    { title: 'Token', align: 'right', render: (_, row) => <span className="mono">{((row.input_tokens ?? 0) + (row.output_tokens ?? 0)).toLocaleString('zh-CN')}</span> },
     { title: '尝试', align: 'right', render: (_, row) => row.attempts.length },
     { title: '', width: 50, render: (_, row) => <Button type="text" icon={<ArrowRight size={15} />} aria-label={`查看请求 ${row.id}`} onClick={() => setDetailId(row.id)} /> },
   ]
@@ -58,12 +58,12 @@ export default function RequestLogs() {
     <section className="page-heading"><div><h1 className="page-title">请求日志</h1><p className="page-subtitle">查看每次模型调用，沿着尝试记录定位问题。</p></div><Button icon={<RefreshCw size={15} />} loading={loading} onClick={refresh}>刷新</Button></section>
     <section className="panel"><form className="table-toolbar" onSubmit={event => { event.preventDefault(); search() }}><Input aria-label="搜索请求" prefix={<Search size={16} />} placeholder="搜索请求 ID、模型或供应商…" value={input} onChange={event => setInput(event.target.value)} allowClear style={{ maxWidth: 340 }} /><Select aria-label="筛选请求状态" value={status} onChange={value => { setStatus(value); setPage(1) }} style={{ minWidth: 126 }} options={[{ value: '', label: '全部状态' }, { value: 'success', label: '成功' }, { value: 'error', label: '失败' }]} /><Button htmlType="submit">搜索</Button><span className="toolbar-count">{data?.total ?? 0} 条请求</span></form>
       {error && <Alert type="error" showIcon message={error} action={<Button size="small" onClick={refresh}>重试</Button>} />}
-      <Table<RequestRecord> rowKey="id" columns={columns} dataSource={data?.items ?? []} loading={loading} scroll={{ x: 980 }} size="middle" pagination={{ current: page, pageSize: 10, total: data?.total ?? 0, onChange: setPage, showSizeChanger: false, showTotal: total => `共 ${total} 条` }} locale={{ emptyText: <Empty description="没有找到请求，调整搜索条件或发起一次测试。" /> }} />
+      <Table<RequestRecord> rowKey="id" columns={columns} dataSource={data?.items ?? []} loading={loading} scroll={{ x: 980 }} size="middle" pagination={{ current: page, pageSize: 10, total: data?.total ?? 0, onChange: setPage, showSizeChanger: false, showTotal: total => `共 ${total} 条` }} locale={{ emptyText: <Empty description="没有找到请求，调整搜索条件。" /> }} />
     </section>
-    <p className="field-note">日志仅记录元数据与模拟 Token，不保存提示词或完整响应正文。</p>
+    <p className="field-note">日志仅记录元数据与 Token，不保存提示词或完整响应正文。</p>
     <Drawer title="请求详情" open={Boolean(detailId)} onClose={() => setDetailId(null)} width={560}>
       {detailLoading ? <Skeleton active paragraph={{ rows: 9 }} /> : detailError ? <Alert type="error" showIcon message={detailError} /> : detail && <>
-        <div className="detail-status"><StatusTag status={detail.status} /><Tag>演示请求</Tag></div>
+        <div className="detail-status"><StatusTag status={detail.status} /></div>
         <h3 className="detail-section-title">请求信息</h3>
         <Descriptions column={1} size="small" items={[
           { key: 'id', label: '请求 ID', children: <span className="mono" style={{ overflowWrap: 'anywhere' }}>{detail.id}</span> },
@@ -71,11 +71,11 @@ export default function RequestLogs() {
           { key: 'time', label: '创建时间', children: time(detail.created_at) },
           { key: 'provider', label: '最终上游', children: detail.provider || '未分配' },
           { key: 'latency', label: '状态码 / 总延迟', children: `${detail.status_code} / ${detail.latency_ms} ms` },
-          { key: 'tokens', label: '输入 / 输出 Token', children: `${detail.input_tokens} / ${detail.output_tokens}` },
+          { key: 'tokens', label: '输入 / 输出 Token', children: `${detail.input_tokens ?? 0} / ${detail.output_tokens ?? 0}` },
         ]} />
         {detail.error && <Alert type="error" showIcon message={detail.error} style={{ marginTop: 16 }} />}
         <h3 className="detail-section-title">上游尝试 <span className="count-badge">{detail.attempts.length}</span></h3>
-        {detail.attempts.map((attempt, index) => <div className="attempt-row" key={`${attempt.provider_id}-${index}`}><span className="attempt-number">{index + 1}</span><div><strong>{attempt.provider}</strong><span className="attempt-error">{attempt.error || '响应成功'}</span></div><span className={`mono ${attempt.status_code >= 400 ? 'danger-text' : 'success-text'}`}>{attempt.status_code}</span><span className="mono muted">{attempt.latency_ms} ms</span></div>)}
+        {detail.attempts.map((attempt, index) => <div className="attempt-row" key={`${attempt.provider_id}-${index}`}><span className="attempt-number">{index + 1}</span><div><strong>{attempt.provider}</strong><span className="attempt-error">{attempt.error || '响应成功'}</span></div><span className={`mono ${attempt.status_code === null || attempt.status_code >= 400 ? 'danger-text' : 'success-text'}`}>{attempt.status_code ?? '无响应'}</span><span className="mono muted">{attempt.latency_ms} ms</span></div>)}
         {!detail.attempts.length && <Empty description="请求未进入上游执行阶段。" />}
       </>}
     </Drawer>

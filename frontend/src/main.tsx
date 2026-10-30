@@ -10,9 +10,9 @@ import './style.css'
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ConfigProvider locale={zhCN} theme={{ token: {
-      colorPrimary: '#596523', colorSuccess: '#28724e', colorError: '#b33f37',
-      colorText: '#2a2d26', colorTextSecondary: '#686c60', colorBorder: '#e3e5dc',
-      borderRadius: 7, fontSize: 13, controlHeight: 36,
+      colorPrimary: '#535dc9', colorSuccess: '#28724e', colorError: '#b33f37',
+      colorText: '#302d3b', colorTextSecondary: '#625e6f', colorBorder: '#e1dce9',
+      borderRadius: 8, fontSize: 13, controlHeight: 36,
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif',
     } }}>
       <AntdApp><AuthProvider><App /></AuthProvider></AntdApp>

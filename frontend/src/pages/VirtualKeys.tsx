@@ -90,7 +90,7 @@ export default function VirtualKeys() {
       {newKey ? <><Alert type="warning" showIcon message="请立即保存，关闭窗口后将无法再次查看明文。" /><div className="new-key-display"><code>{newKey}</code><Button type="text" icon={<Copy size={17} />} aria-label="复制新密钥" onClick={copy} /></div></> : <Form form={form} layout="vertical" initialValues={{ name: '', rpm_limit: 60 }} onFinish={create} requiredMark={false} disabled={creating}>
         <Form.Item label="名称" name="name" rules={[{ required: true, whitespace: true, message: '请输入密钥名称。' }, { max: 60, message: '名称最多 60 个字符。' }]}><Input maxLength={60} autoComplete="off" placeholder="例如：开发环境应用" /></Form.Item>
         <Form.Item label="每分钟请求上限" name="rpm_limit" rules={[{ required: true, type: 'number', min: 1, max: 1000, message: '请输入 1–1000 之间的整数。' }]}><InputNumber min={1} max={1000} precision={0} aria-label="每分钟请求上限" /></Form.Item>
-        <p className="field-note">Demo 使用单进程限流，不代表生产级共享额度。</p>
+        <p className="field-note">当前使用单进程限流，共享额度后续接入 Redis。</p>
         {createError && <Alert type="error" showIcon message={createError} />}
       </Form>}
     </Modal>

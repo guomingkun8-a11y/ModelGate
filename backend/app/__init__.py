@@ -1,1 +1,1 @@
-"""ModelGate local demonstration application."""
+"""ModelGate — multi-provider model API gateway."""

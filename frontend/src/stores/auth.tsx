@@ -1,36 +1,54 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
-import { login } from '../api/auth'
+import { login, logout, register } from '../api/auth'
 
 type Auth = {
   token: string | null
   name: string
-  signIn: (password: string) => Promise<void>
-  signOut: () => void
+  role: 'admin' | 'user'
+  signIn: (identifier: string, password: string) => Promise<void>
+  signUp: (email: string, name: string, password: string) => Promise<void>
+  signOut: () => Promise<void>
 }
 const AuthContext = createContext<Auth | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState(() => sessionStorage.getItem('modelgate-token'))
-  const [name, setName] = useState(() => sessionStorage.getItem('modelgate-name') || 'Demo Admin')
-  const signOut = useCallback(() => {
+  const [name, setName] = useState(() => sessionStorage.getItem('modelgate-name') || 'Admin')
+  const [role, setRole] = useState<'admin' | 'user'>(() => sessionStorage.getItem('modelgate-role') === 'user' ? 'user' : 'admin')
+  const clearSession = useCallback(() => {
     sessionStorage.removeItem('modelgate-token')
     sessionStorage.removeItem('modelgate-name')
+    sessionStorage.removeItem('modelgate-role')
     setToken(null)
-    setName('Demo Admin')
+    setName('Admin')
+    setRole('admin')
   }, [])
-  const signIn = useCallback(async (password: string) => {
-    const result = await login(password)
+  const acceptSession = useCallback((result: {token: string; name: string; role: 'admin' | 'user'}) => {
     sessionStorage.setItem('modelgate-token', result.token)
     sessionStorage.setItem('modelgate-name', result.name)
+    sessionStorage.setItem('modelgate-role', result.role)
     setToken(result.token)
     setName(result.name)
+    setRole(result.role)
   }, [])
+  const signIn = useCallback(async (identifier: string, password: string) => {
+    acceptSession(await login(identifier, password))
+  }, [acceptSession])
+  const signUp = useCallback(async (email: string, name: string, password: string) => {
+    acceptSession(await register(email, name, password))
+  }, [acceptSession])
+  const signOut = useCallback(async () => {
+    if (token) {
+      try { await logout() } catch { /* Clear the local session even when the API is unavailable. */ }
+    }
+    clearSession()
+  }, [clearSession, token])
   useEffect(() => {
-    window.addEventListener('modelgate:unauthorized', signOut)
-    return () => window.removeEventListener('modelgate:unauthorized', signOut)
-  }, [signOut])
-  return <AuthContext.Provider value={{token, name, signIn, signOut}}>{children}</AuthContext.Provider>
+    window.addEventListener('modelgate:unauthorized', clearSession)
+    return () => window.removeEventListener('modelgate:unauthorized', clearSession)
+  }, [clearSession])
+  return <AuthContext.Provider value={{token, name, role, signIn, signUp, signOut}}>{children}</AuthContext.Provider>
 }
 
 export function useAuth() {

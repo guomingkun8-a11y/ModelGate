@@ -2,80 +2,81 @@
 
 面向团队的多模型 API 网关，作为 Python 后端 / AI 平台方向的开源作品集项目。
 
-## 当前版本：可本地体验的 Demo
+## 当前版本：本地可运行的多模型网关
 
-React 19 中文管理台 + FastAPI 演示后端。前端采用 TypeScript、Vite、Ant Design 和 React Router。无需真实模型 API Key、PostgreSQL 或 Redis，即可查看流量、发起模拟请求并观察故障切换。
+ModelGate 提供 React 19 + TypeScript 管理台和 FastAPI 后端。后端使用 PostgreSQL 保存账号、虚拟密钥、请求记录，以及由管理员统一维护的共享上游渠道和模型路由，并可转发到 OpenAI 兼容上游。
 
-- **总览**：请求量、成功率、P95 延迟、Token、流量趋势与最近请求。
-- **供应商与路由**：查看模型映射、启停模拟上游，验证备用渠道接管。
-- **测试请求**：选择模型与输入，主动模拟首个上游故障，查看回答和尝试过程。
-- **虚拟密钥**：创建、一次展示、复制和撤销；模型接口与管理接口独立鉴权。
-- **日志与用量**：筛选请求、查看逐次上游尝试和 Token 汇总。
-- **兼容接口**：`/v1/models`、`/v1/chat/completions`，支持 JSON 与 SSE。
+首页提供公开注册入口。普通用户使用邮箱注册和登录，账号数据相互隔离；管理员和普通用户共用登录页面，管理员账号为 `admin`，本机默认密码为 `admin123456`。系统只有 `admin` 和 `user` 两种角色，管理员拥有管理权限。
 
-所有模型回答、Token 和初始历史记录均为演示数据。新增测试请求经过本地模拟调度并写入 SQLite，刷新页面仍保留；它们不是实际厂商调用或真实账单。
+- **总览**：查看当前账号的请求量、延迟、Token 和近期请求。
+- **上游与模型路由**：管理员添加并测试共享上游，配置公开模型名；普通用户只查看可用渠道和模型，通过自己的虚拟密钥调用。
+- **虚拟密钥**：创建 `sk-` 密钥、一次展示明文并撤销。
+- **日志与用量**：筛选当前账号的请求并查看用量。
+- **兼容接口**：提供 `/v1/models` 和 `/v1/chat/completions`。
 
-![ModelGate 演示控制台](docs/screenshots/overview.png)
+生产入口使用 PostgreSQL，启动时会自动运行 Alembic 迁移。首次升级已有数据库前，请先备份。当前共享限流仍为单进程实现，Redis 尚未接入。
 
 ## 本地启动（Windows）
 
-需要 Python 3.11+、Node.js 20.19+ 和 npm；首次安装依赖需要网络。
+需要 Python 3.11+、Node.js 20.19+、npm 和 PostgreSQL。可使用项目提供的 Docker Compose 启动 PostgreSQL；已有 PostgreSQL 时也可配置 `.env` 中的连接地址。
 
 ```powershell
-git clone https://github.com/guomingkun8-a11y/ModelGate.git
-cd ModelGate
-powershell -ExecutionPolicy Bypass -File .\scripts\start-demo.ps1
+Copy-Item .env.example .env
+docker compose up -d postgres
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r backend/requirements.txt
+.\.venv\Scripts\python.exe -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
 ```
 
-已经在本机项目目录时，直接运行启动脚本即可。
+将命令生成的 Fernet Key 填入 `.env` 的 `MASTER_KEY`。本机管理员默认账号为 `admin` / `admin123456`；部署到共享环境前请修改密码。
 
-脚本创建 `.venv`、安装依赖、检查并构建前端，然后在 [http://127.0.0.1:8010](http://127.0.0.1:8010) 启动服务。按 `Ctrl+C` 停止。
-
-已经安装并构建后，快速再次启动：
+在第一个终端启动后端：
 
 ```powershell
-.\scripts\start-demo.ps1 -SkipInstall -SkipBuild
+.\scripts\start-backend.ps1 -SkipInstall
 ```
 
-端口占用时可以使用 `-Port 8011`。脚本不会停止其他项目服务。
+在第二个终端启动前端：
 
-## 推荐体验顺序
+```powershell
+Set-Location frontend
+npm ci
+npm run dev
+```
 
-1. 在登录页进入演示工作区，观察初始样例流量。
-2. 打开“测试请求”，发送一次普通请求，再启用故障模拟发送一次。
-3. 在请求日志中查看结果、上游切换和尝试状态。
-4. 禁用一个供应商并重试；查看路由是否跳过它，体验后恢复开启。
-5. 创建虚拟 Key，只在创建时复制明文，再撤销并验证它无法继续调用。
-
-默认演示登录密码是 `modelgate-demo`，默认演示虚拟 Key 是 `sk-demo-local`，仅供本机 Demo 使用。新建虚拟 Key 也使用 `sk-` 前缀；旧的自定义 Key 仍可继续使用。更多独立接口示例见 [demo-request.http](examples/demo-request.http)。
+打开 [http://127.0.0.1:5175](http://127.0.0.1:5175)。注册页为 [http://127.0.0.1:5175/register](http://127.0.0.1:5175/register)；登录页同时接受用户邮箱或管理员账号。后端默认端口为 `8012`，Vite 默认代理到该地址。
 
 ## 项目分类
 
 ```text
 ModelGate/
-├── backend/             # FastAPI、SQLite 演示状态、网关逻辑与测试
+├── backend/             # FastAPI、PostgreSQL 持久化、网关逻辑与测试
 ├── frontend/            # React 19 + TypeScript + Vite + Ant Design 管理台
-├── docs/                # Demo 契约、长期架构与阶段清单
-├── deploy/nginx/        # 生产部署阶段预留
-├── scripts/             # 一键启动脚本
+├── docs/                # 当前 API、历史 Demo 设计、长期架构与阶段清单
+├── deploy/nginx/        # Nginx 部署配置预留
+├── scripts/             # 本地开发辅助脚本
 ├── examples/            # 可执行的 HTTP 调用示例
 ├── loadtests/           # 正式压测阶段预留
 └── .github/workflows/   # 后续 CI 预留
 ```
 
-- [Demo 能力与接口](docs/DEMO.md)
+- [当前接口与权限](docs/API.md)
+- [历史 Demo 设计（已移除）](docs/DEMO.md)
 - [长期目标与架构](docs/PLAN.md)
 - [生产版阶段清单](docs/ROADMAP.md)
 - [后端运行与验证](backend/README.md)
 - [前端运行与结构](frontend/README.md)
+- [网关 HTTP 调用示例](examples/gateway-request.http)
 
-## Demo 与生产版边界
+## 当前边界
 
-当前使用 SQLite、进程内限制和模拟供应商，适合单进程本地演示。PostgreSQL、Redis 共享限流、真实上游适配、跨进程熔断、预算、生产登录与可靠计费仍按原计划实现。历史样例不作为压测证据，尚未声明生产性能指标。
+账号数据、上游配置和请求记录持久化到 PostgreSQL。管理员在渠道管理页统一配置 OpenAI Chat Completions 兼容上游，普通用户查看共享渠道和公开模型，并使用自己的虚拟密钥调用。历史私有渠道需经管理员明确确认后发布为共享渠道。
+
+Redis 尚未接入；共享限流、分布式并发租约、预算治理和可靠计费尚未实现。`stream: true` 当前仅在完整上游响应返回后输出一个 SSE 内容块和 `[DONE]`，属于缓冲输出，不是实时增量转发。上游 API Key 由 `MASTER_KEY` 加密保存，列表和编辑 API 不返回密钥。上游仅允许公网 HTTPS 地址，DNS 解析和实际连接都会拒绝私网目标。
 
 ## 验证方式
 
-React 迁移已通过类型检查、生产构建和浏览器交互验收。复验命令：
+前端类型检查与生产构建命令：
 
 ```powershell
 cd frontend
@@ -85,9 +86,6 @@ cd ../backend
 ../.venv/Scripts/python -m pytest tests -q
 ```
 
-浏览器验收覆盖登录与受保护地址回跳、测试请求及 503 故障切换、请求尝试详情、供应商启停、虚拟 Key 创建与撤销、用量时间筛选和移动端导航。后端接口、SQLite 数据与模型模拟机制沿用现有 Demo。
-
-更多演示截图：[故障切换](docs/screenshots/demo-request.png)、[请求详情](docs/screenshots/request-details.png)。
 
 ## 开源许可
 

@@ -1,0 +1,32 @@
+# 先按根 README 启动后端，并由管理员在渠道管理页配置共享渠道和公开模型。
+# 登录用户在“虚拟密钥”创建 sk- 密钥，替换下列 apiKey 和公开模型名。
+# 以下请求会访问真实上游，可能产生供应商费用。
+@baseUrl = http://127.0.0.1:8012
+@apiKey = sk-replace-with-your-virtual-key
+@model = replace-with-your-public-model
+
+### 列出可调用的公开模型（虚拟 Key 与控制台登录令牌独立）
+GET {{baseUrl}}/v1/models
+Authorization: Bearer {{apiKey}}
+
+### 非流式聊天
+POST {{baseUrl}}/v1/chat/completions
+Authorization: Bearer {{apiKey}}
+Content-Type: application/json
+
+{
+  "model": "{{model}}",
+  "messages": [{"role": "user", "content": "解释一下模型网关的故障切换"}],
+  "stream": false
+}
+
+### 缓冲 SSE：完整上游响应后返回一个内容块与 [DONE]，尚非实时增量转发
+POST {{baseUrl}}/v1/chat/completions
+Authorization: Bearer {{apiKey}}
+Content-Type: application/json
+
+{
+  "model": "{{model}}",
+  "messages": [{"role": "user", "content": "介绍 ModelGate"}],
+  "stream": true
+}
